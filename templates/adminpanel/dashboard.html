@@ -1,0 +1,98 @@
+{% extends "adminpanel/base_admin.html" %}
+
+{% block title %}Overview – KEPTO Admin{% endblock %}
+
+{% block content %}
+<div class="section-heading" style="text-align:left;margin-bottom:1.5rem;">
+  <h2>Overview</h2>
+</div>
+
+<div class="card-grid" style="margin-bottom:2.5rem;">
+  <div class="stat-tile">
+    <div class="stat-tile__label">Total Capital</div>
+    <div class="stat-tile__value">KES {{ total_capital }}</div>
+  </div>
+  <div class="stat-tile">
+    <div class="stat-tile__label">Approved Members</div>
+    <div class="stat-tile__value">{{ total_members }}</div>
+  </div>
+  <div class="stat-tile">
+    <div class="stat-tile__label">Members Pending Approval</div>
+    <div class="stat-tile__value">{{ pending_members_count }}</div>
+    <a href="{% url 'adminpanel:members_pending' %}">Review &rarr;</a>
+  </div>
+  <div class="stat-tile">
+    <div class="stat-tile__label">Deposits Pending Review</div>
+    <div class="stat-tile__value">{{ pending_deposits_count }}</div>
+    <a href="{% url 'adminpanel:deposits_pending' %}">Review &rarr;</a>
+  </div>
+</div>
+
+<div class="section-heading" style="text-align:left;margin-bottom:1rem;">
+  <h2>Capital Growth</h2>
+</div>
+
+{% if growth %}
+  <div class="growth-chart" role="img" aria-label="Cumulative approved capital by month, growing from {{ growth.0.cumulative }} to {{ total_capital }} Kenyan shillings">
+    {% for row in growth %}
+      <div class="growth-bar">
+        <div class="growth-bar__fill"
+             style="height:{{ row.bar_pct }}%;"
+             title="{{ row.month|date:'M Y' }}: KES {{ row.cumulative }} cumulative (+KES {{ row.added }})"></div>
+        <div class="growth-bar__label">{{ row.month|date:"M 'y" }}</div>
+      </div>
+    {% endfor %}
+  </div>
+  <details style="margin:1rem 0 2.5rem;">
+    <summary style="cursor:pointer;color:var(--color-muted);">View as table</summary>
+    <div class="admin-table-wrap" style="margin-top:1rem;">
+      <table class="admin-table">
+        <thead><tr><th>Month</th><th>New capital</th><th>Cumulative total</th></tr></thead>
+        <tbody>
+          {% for row in growth %}
+            <tr>
+              <td>{{ row.month|date:"F Y" }}</td>
+              <td>KES {{ row.added }}</td>
+              <td>KES {{ row.cumulative }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </details>
+{% else %}
+  <div class="placeholder-block" style="margin-bottom:2.5rem;">No approved deposits yet — growth will appear here once deposits are approved.</div>
+{% endif %}
+
+<div class="card-grid">
+  <div>
+    <div class="section-heading" style="text-align:left;margin-bottom:1rem;">
+      <h2>By Institution</h2>
+    </div>
+    {% if institution_groups %}
+      <ul class="group-list">
+        {% for group in institution_groups %}
+          <li><span>{{ group.name }} ({{ group.member_count }})</span><strong>KES {{ group.total_capital }}</strong></li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <div class="placeholder-block">No approved student members yet.</div>
+    {% endif %}
+  </div>
+
+  <div>
+    <div class="section-heading" style="text-align:left;margin-bottom:1rem;">
+      <h2>By Industry</h2>
+    </div>
+    {% if industry_groups %}
+      <ul class="group-list">
+        {% for group in industry_groups %}
+          <li><span>{{ group.name }} ({{ group.member_count }})</span><strong>KES {{ group.total_capital }}</strong></li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <div class="placeholder-block">No approved professional members yet.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

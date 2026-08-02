@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<section class="hero">
+  <div class="container hero__inner">
+    <h1>Learn. Save. Build. Grow.</h1>
+    <p>KEPTO is a campus-based savings and entrepreneurship community helping students build financial discipline and launch real businesses — together.</p>
+    <div class="hero__actions">
+      <a href="{% url 'accounts:signup' %}" class="btn btn--gold">Register Your Interest</a>
+      <a href="{% url 'pages:savings' %}" class="btn btn--outline">How Saving Works</a>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="section-heading">
+      <h2>What is KEPTO?</h2>
+      <p>KEPTO exists to help students save consistently, learn practical financial skills, and turn business ideas into reality — before graduation, not after.</p>
+    </div>
+    <div class="stats">
+      <div><strong>Kes 0</strong><span>Saved by members (growing)</span></div>
+      <div><strong>0</strong><span>Active members</span></div>
+      <div><strong>0</strong><span>Businesses supported</span></div>
+      <div><strong>0</strong><span>Workshops held</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="container">
+    <div class="section-heading">
+      <h2>Why students join KEPTO</h2>
+      <p>A community built specifically for the campus stage of life.</p>
+    </div>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card__icon">💰</div>
+        <h3>Small, consistent savings</h3>
+        <p>Start saving with whatever you have — no minimum is too small to build the habit.</p>
+      </div>
+      <div class="card">
+        <div class="card__icon">📈</div>
+        <h3>Financial literacy</h3>
+        <p>Practical workshops on budgeting, saving, and investing designed for student life.</p>
+      </div>
+      <div class="card">
+        <div class="card__icon">🚀</div>
+        <h3>Entrepreneurship support</h3>
+        <p>Guidance, resources, and a community to help you launch your first business idea.</p>
+      </div>
+      <div class="card">
+        <div class="card__icon">🤝</div>
+        <h3>A community, not just an app</h3>
+        <p>Connect with other students on the same journey toward financial independence.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="section-heading">
+      <h2>What members are saying</h2>
+    </div>
+    <div class="placeholder-block">Member testimonials are coming soon.</div>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="container">
+    <div class="section-heading">
+      <h2>Our partners</h2>
+    </div>
+    <div class="placeholder-block">Partner logos will be featured here.</div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="section-heading">
+      <h2>Latest news</h2>
+      <p>Updates, announcements, and community highlights.</p>
+    </div>
+    {% if announcements %}
+      <div class="card-grid">
+        {% for announcement in announcements %}
+          <div class="card">
+            <h3>{{ announcement.title }}</h3>
+            <p>{{ announcement.body|truncatewords:30 }}</p>
+            <p style="color:var(--color-muted);font-size:.85rem;">{{ announcement.created_at|date:"d M Y" }}</p>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="placeholder-block">No news posted yet — check back soon.</div>
+    {% endif %}
+  </div>
+</section>
+
+<section class="alt faq">
+  <div class="container">
+    <div class="section-heading">
+      <h2>Frequently asked questions</h2>
+    </div>
+    <details>
+      <summary>Who can join KEPTO?</summary>
+      <p>Any student interested in building a savings habit and exploring entrepreneurship can join.</p>
+    </details>
+    <details>
+      <summary>How much do I need to start saving?</summary>
+      <p>There's no fixed minimum — KEPTO is built around consistent small deposits, not large lump sums.</p>
+    </details>
+    <details>
+      <summary>Is my money safe?</summary>
+      <p>Deposits go through a verified confirmation and approval process before your balance updates. See the Savings page for details.</p>
+    </details>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="section-heading">
+      <h2>Ready to start?</h2>
+      <p>Join students already building their savings and business future with KEPTO.</p>
+    </div>
+    <div style="text-align:center;">
+      <a href="{% url 'accounts:signup' %}" class="btn btn--primary">Register Your Interest</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

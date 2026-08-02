@@ -1,0 +1,43 @@
+{% extends "adminpanel/base_admin.html" %}
+
+{% block title %}Pending Members – KEPTO Admin{% endblock %}
+
+{% block content %}
+<div class="section-heading" style="text-align:left;margin-bottom:1.5rem;">
+  <h2>Members Pending Approval</h2>
+</div>
+
+{% if members %}
+  <div class="admin-table-wrap">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Member ID</th><th>Name</th><th>Phone</th><th>Type</th><th>School / Industry</th><th>Joined</th><th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for member in members %}
+          <tr>
+            <td>{{ member.member_id }}</td>
+            <td>{{ member.user.username }}</td>
+            <td>{{ member.phone_number }}</td>
+            <td>{{ member.get_member_type_display }}</td>
+            <td>{{ member.institution|default:member.industry }}</td>
+            <td>{{ member.created_at|date:"d M Y" }}</td>
+            <td>
+              <form method="post" class="row-actions">
+                {% csrf_token %}
+                <input type="hidden" name="member_id" value="{{ member.pk }}">
+                <button type="submit" name="action" value="approve" class="btn btn--primary">Approve</button>
+                <button type="submit" name="action" value="reject" class="btn btn--danger-outline">Reject</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <div class="placeholder-block">No members waiting for approval.</div>
+{% endif %}
+{% endblock %}

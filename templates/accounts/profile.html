@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile – KEPTO{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="container hero__inner">
+    <h1>Welcome, {{ user.username }}</h1>
+    <p>Here's your KEPTO profile.</p>
+  </div>
+</section>
+
+<section>
+  <div class="container card-grid">
+    <div class="card">
+      <h3>Account</h3>
+      <p><strong>Member ID:</strong> {{ member.member_id }}</p>
+      <p><strong>Username:</strong> {{ user.username }}</p>
+      <p><strong>Email:</strong> {{ user.email }}</p>
+      <p><strong>Phone number:</strong> {{ member.phone_number }}</p>
+      <p><strong>Member type:</strong> {{ member.get_member_type_display }}</p>
+    </div>
+
+    <div class="card">
+      {% if member.member_type == 'student' %}
+        <h3>Student details</h3>
+        <p><strong>School:</strong> {{ member.institution }}</p>
+        <p><strong>Year of study:</strong> {{ member.year_of_study }}</p>
+      {% else %}
+        <h3>Professional details</h3>
+        <p><strong>Industry:</strong> {{ member.industry }}</p>
+        <p><strong>Business / Employer:</strong> {{ member.business_name }}</p>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <h3>Savings</h3>
+      <p style="color:var(--color-muted);">View your balance, deposit history, and make a new deposit.</p>
+      <a href="{% url 'savings:dashboard' %}" class="btn btn--primary">Go to Dashboard</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

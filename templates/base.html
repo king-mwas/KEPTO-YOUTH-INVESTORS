@@ -1,0 +1,107 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}KEPTO – Student Savings & Entrepreneurship Platform{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}KEPTO is a campus-based savings and entrepreneurship community helping students learn, save, build, and grow.{% endblock %}">
+
+  <meta property="og:title" content="{% block og_title %}KEPTO – Student Savings & Entrepreneurship Platform{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}Learn. Save. Build. Grow. Join KEPTO, the campus savings and entrepreneurship community.{% endblock %}">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="{% static 'branding/kepto-logo.png' %}">
+
+  <link rel="icon" href="{% static 'branding/kepto-logo.png' %}">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="{% url 'pages:home' %}" class="nav__brand">
+        <img src="{% static 'branding/kepto-logo.png' %}" alt="KEPTO logo">
+        <span>KEPTO</span>
+      </a>
+
+      <input type="checkbox" id="nav-toggle" class="nav__toggle">
+      <label for="nav-toggle" class="nav__hamburger" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </label>
+
+      <ul class="nav__links">
+        <li><a href="{% url 'pages:home' %}">Home</a></li>
+        <li><a href="{% url 'pages:about' %}">About</a></li>
+        <li><a href="{% url 'pages:entrepreneurship' %}">Entrepreneurship</a></li>
+        <li><a href="{% url 'pages:savings' %}">Savings</a></li>
+        <li><a href="{% url 'pages:contact' %}">Contact</a></li>
+      </ul>
+
+      <div class="nav__cta">
+        {% if user.is_authenticated %}
+          {% if user.is_staff %}
+            <a href="{% url 'adminpanel:dashboard' %}" class="btn btn--outline">Admin Panel</a>
+          {% endif %}
+          {% if user.member %}
+            <a href="{% url 'savings:dashboard' %}" class="btn btn--outline">Dashboard</a>
+            <a href="{% url 'accounts:profile' %}" class="btn btn--outline">My Profile</a>
+          {% endif %}
+          <form action="{% url 'accounts:logout' %}" method="post" style="margin:0;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn--gold">Logout</button>
+          </form>
+        {% else %}
+          <a href="{% url 'accounts:login' %}" class="btn btn--outline">Login</a>
+          <a href="{% url 'accounts:signup' %}" class="btn btn--gold">Join KEPTO</a>
+        {% endif %}
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    {% if messages %}
+      <div class="container" style="padding-top:1.5rem;">
+        {% for message in messages %}
+          <div class="alert {% if message.tags == 'success' %}alert--success{% elif message.tags == 'error' %}alert--error{% else %}alert--warning{% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <h4>KEPTO</h4>
+          <p style="opacity:.85;">Learn. Save. Build. Grow.</p>
+        </div>
+        <div>
+          <h4>Explore</h4>
+          <a href="{% url 'pages:about' %}">About</a>
+          <a href="{% url 'pages:entrepreneurship' %}">Entrepreneurship</a>
+          <a href="{% url 'pages:savings' %}">Savings</a>
+        </div>
+        <div>
+          <h4>Get in touch</h4>
+          <a href="{% url 'pages:contact' %}">Contact us</a>
+          {% if site_settings.contact_email %}
+            <a href="mailto:{{ site_settings.contact_email }}">{{ site_settings.contact_email }}</a>
+          {% endif %}
+          {% if site_settings.whatsapp_group_link %}
+            <a href="{{ site_settings.whatsapp_group_link }}" target="_blank" rel="noopener">WhatsApp</a>
+          {% endif %}
+          {% if site_settings.instagram_link %}
+            <a href="{{ site_settings.instagram_link }}" target="_blank" rel="noopener">Instagram</a>
+          {% endif %}
+        </div>
+      </div>
+      <div class="footer-bottom">
+        &copy; {% now "Y" %} KEPTO. All rights reserved.
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

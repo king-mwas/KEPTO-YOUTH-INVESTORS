@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Join KEPTO{% endblock %}
+{% block meta_description %}Sign up for KEPTO — the campus savings and entrepreneurship platform.{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="container hero__inner">
+    <h1>Join KEPTO</h1>
+    <p>Create your account to start saving and connecting with the KEPTO community.</p>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <form method="post" class="stacked-form">
+      {% csrf_token %}
+
+      <div>
+        <label for="{{ form.username.id_for_label }}">Username</label>
+        {{ form.username }}
+        {{ form.username.errors }}
+      </div>
+      <div>
+        <label for="{{ form.email.id_for_label }}">Email</label>
+        {{ form.email }}
+        {{ form.email.errors }}
+      </div>
+      <div>
+        <label for="{{ form.phone_number.id_for_label }}">Phone Number</label>
+        {{ form.phone_number }}
+        <p style="font-size:.85rem;color:var(--color-muted);margin:.35rem 0 0;">{{ form.phone_number.help_text }}</p>
+        {{ form.phone_number.errors }}
+      </div>
+      <div>
+        <label for="{{ form.password1.id_for_label }}">Password</label>
+        {{ form.password1 }}
+        {{ form.password1.errors }}
+      </div>
+      <div>
+        <label for="{{ form.password2.id_for_label }}">Confirm password</label>
+        {{ form.password2 }}
+        {{ form.password2.errors }}
+      </div>
+
+      <div class="toggle-group">
+        <input type="radio" id="mt-student" name="member_type" value="student"
+               {% if form.member_type.value != 'professional' %}checked{% endif %}>
+        <label for="mt-student">🎓 I'm a Student</label>
+
+        <input type="radio" id="mt-professional" name="member_type" value="professional"
+               {% if form.member_type.value == 'professional' %}checked{% endif %}>
+        <label for="mt-professional">💼 I'm a Working Professional</label>
+
+        <div class="member-type-fields">
+          <div class="student-fields">
+            <label for="{{ form.institution.id_for_label }}">School / University</label>
+            {{ form.institution }}
+            <datalist id="institution-options">
+              {% for name in institutions %}<option value="{{ name }}">{% endfor %}
+            </datalist>
+            {{ form.institution.errors }}
+
+            <label for="{{ form.year_of_study.id_for_label }}" style="margin-top:.75rem;">Year of study</label>
+            {{ form.year_of_study }}
+            {{ form.year_of_study.errors }}
+          </div>
+
+          <div class="professional-fields">
+            <label for="{{ form.industry.id_for_label }}">Industry</label>
+            {{ form.industry }}
+            <datalist id="industry-options">
+              {% for name in industries %}<option value="{{ name }}">{% endfor %}
+            </datalist>
+            {{ form.industry.errors }}
+
+            <label for="{{ form.business_name.id_for_label }}" style="margin-top:.75rem;">Business / Employer name</label>
+            {{ form.business_name }}
+            {{ form.business_name.errors }}
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn--primary">Create account</button>
+    </form>
+
+    <p style="margin-top:1rem;">Already have an account? <a href="{% url 'accounts:login' %}">Log in</a></p>
+  </div>
+</section>
+{% endblock %}

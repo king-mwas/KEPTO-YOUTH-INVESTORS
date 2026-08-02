@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}New Deposit – KEPTO{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="container hero__inner">
+    <h1>Make a Deposit</h1>
+    <p>Enter how much you'd like to save — we'll give you payment instructions next.</p>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <form method="post" class="stacked-form">
+      {% csrf_token %}
+      <div>
+        <label for="{{ form.amount.id_for_label }}">Amount (KES)</label>
+        {{ form.amount }}
+        {{ form.amount.errors }}
+      </div>
+      <button type="submit" class="btn btn--primary">Continue</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

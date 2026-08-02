@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Confirm Deposit – KEPTO{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="container hero__inner">
+    <h1>Payment Instructions</h1>
+    <p>Complete your payment below, then confirm it here.</p>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="card-grid" style="max-width:720px;margin-bottom:2rem;">
+      {% if site_settings.paybill_number %}
+        <div class="card">
+          <h3>Pay via M-Pesa</h3>
+          <p><strong>Paybill Number:</strong> {{ site_settings.paybill_number }}</p>
+          <p><strong>Account Number:</strong> {{ deposit.member.member_id }}</p>
+          <p><strong>Amount:</strong> KES {{ deposit.amount }}</p>
+        </div>
+      {% endif %}
+      {% if site_settings.bank_account_details %}
+        <div class="card">
+          <h3>Pay via Bank Transfer</h3>
+          <p style="white-space:pre-line;">{{ site_settings.bank_account_details }}</p>
+          <p><strong>Reference:</strong> {{ deposit.member.member_id }}</p>
+          <p><strong>Amount:</strong> KES {{ deposit.amount }}</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="stacked-form">
+      {% csrf_token %}
+      <div>
+        <label for="{{ form.transaction_code.id_for_label }}">M-Pesa Transaction Code</label>
+        {{ form.transaction_code }}
+        {{ form.transaction_code.errors }}
+      </div>
+      <div>
+        <label for="{{ form.proof.id_for_label }}">Or upload proof of payment</label>
+        {{ form.proof }}
+        {{ form.proof.errors }}
+      </div>
+      {{ form.non_field_errors }}
+      <button type="submit" class="btn btn--primary">Submit for Review</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Contact KEPTO{% endblock %}
+{% block meta_description %}Get in touch with KEPTO — send us a message, chat on WhatsApp, or find us on the map.{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="container hero__inner">
+    <h1>Get in Touch</h1>
+    <p>Questions about membership, savings, or entrepreneurship support? We'd love to hear from you.</p>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="contact-methods">
+      {% if site_settings.whatsapp_group_link %}
+        <a href="{{ site_settings.whatsapp_group_link }}" target="_blank" rel="noopener" class="btn btn--primary">Chat on WhatsApp</a>
+      {% endif %}
+      {% if site_settings.contact_email %}
+        <a href="mailto:{{ site_settings.contact_email }}" class="btn btn--outline" style="color:var(--color-navy); border-color:var(--color-navy);">{{ site_settings.contact_email }}</a>
+      {% endif %}
+      {% if site_settings.instagram_link %}
+        <a href="{{ site_settings.instagram_link }}" target="_blank" rel="noopener" class="btn btn--outline" style="color:var(--color-navy); border-color:var(--color-navy);">Instagram</a>
+      {% endif %}
+    </div>
+
+    <form method="post" class="stacked-form">
+      {% csrf_token %}
+      {% for field in form %}
+        <div>
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {{ field.errors }}
+        </div>
+      {% endfor %}
+      <button type="submit" class="btn btn--primary">Send Message</button>
+    </form>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="container">
+    <div class="section-heading">
+      <h2>Find us</h2>
+    </div>
+    <div class="map-embed">
+      <!-- TODO: replace with KEPTO's actual campus location embed URL -->
+      <iframe
+        src="https://www.google.com/maps?q=Nairobi,Kenya&output=embed"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        title="KEPTO location placeholder">
+      </iframe>
+    </div>
+  </div>
+</section>
+{% endblock %}

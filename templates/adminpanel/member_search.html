@@ -1,0 +1,70 @@
+{% extends "adminpanel/base_admin.html" %}
+
+{% block title %}Find Member – KEPTO Admin{% endblock %}
+
+{% block content %}
+<div class="section-heading" style="text-align:left;margin-bottom:1.5rem;">
+  <h2>Find a Member</h2>
+</div>
+
+<form method="get" class="search-box">
+  <input type="text" name="q" value="{{ query }}" placeholder="Enter Member ID e.g. 02336791" inputmode="numeric">
+  <button type="submit" class="btn btn--primary">Search</button>
+</form>
+
+{% if member %}
+  <div class="card-grid" style="margin-bottom:2rem;">
+    <div class="stat-tile">
+      <div class="stat-tile__label">Member ID</div>
+      <div class="stat-tile__value">{{ member.member_id }}</div>
+    </div>
+    <div class="stat-tile">
+      <div class="stat-tile__label">Balance</div>
+      <div class="stat-tile__value">KES {{ balance }}</div>
+    </div>
+    <div class="stat-tile">
+      <div class="stat-tile__label">Status</div>
+      <div class="stat-tile__value" style="font-size:1.1rem;">
+        <span class="badge badge--{{ member.status }}">{{ member.get_status_display }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:2rem;max-width:560px;">
+    <h3>{{ member.user.username }}</h3>
+    <p><strong>Phone:</strong> {{ member.phone_number }}</p>
+    <p><strong>Type:</strong> {{ member.get_member_type_display }}</p>
+    {% if member.member_type == 'student' %}
+      <p><strong>School:</strong> {{ member.institution|default:"—" }}</p>
+      <p><strong>Year of study:</strong> {{ member.year_of_study|default:"—" }}</p>
+    {% else %}
+      <p><strong>Industry:</strong> {{ member.industry|default:"—" }}</p>
+      <p><strong>Business/Employer:</strong> {{ member.business_name|default:"—" }}</p>
+    {% endif %}
+  </div>
+
+  <div class="section-heading" style="text-align:left;margin-bottom:1rem;">
+    <h2>Deposit history</h2>
+  </div>
+  {% if deposits %}
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead><tr><th>Date</th><th>Amount</th><th>Status</th></tr></thead>
+        <tbody>
+          {% for deposit in deposits %}
+            <tr>
+              <td>{{ deposit.created_at|date:"d M Y, H:i" }}</td>
+              <td>KES {{ deposit.amount }}</td>
+              <td><span class="badge badge--{{ deposit.status }}">{{ deposit.get_status_display }}</span></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="placeholder-block">This member hasn't made any deposits yet.</div>
+  {% endif %}
+{% elif query %}
+  <div class="placeholder-block">No member found with Member ID "{{ query }}".</div>
+{% endif %}
+{% endblock %}

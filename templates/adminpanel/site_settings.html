@@ -1,0 +1,54 @@
+{% extends "adminpanel/base_admin.html" %}
+
+{% block title %}Site Settings – KEPTO Admin{% endblock %}
+
+{% block content %}
+<div class="section-heading" style="text-align:left;margin-bottom:1.5rem;">
+  <h2>Site Settings</h2>
+  <p style="color:var(--color-muted);">These show up on the member dashboard and deposit instructions.</p>
+</div>
+
+<form method="post" class="stacked-form" style="max-width:640px;">
+  {% csrf_token %}
+
+  <div>
+    <label for="{{ form.contact_email.id_for_label }}">Contact Email</label>
+    {{ form.contact_email }}
+    {{ form.contact_email.errors }}
+  </div>
+
+  <div>
+    <label for="{{ form.paybill_number.id_for_label }}">M-Pesa Paybill Number</label>
+    {{ form.paybill_number }}
+    {{ form.paybill_number.errors }}
+  </div>
+
+  <div>
+    <label for="{{ form.bank_account_details.id_for_label }}">Bank Account Details</label>
+    {{ form.bank_account_details }}
+    <p style="font-size:.85rem;color:var(--color-muted);margin:.35rem 0 0;">{{ form.bank_account_details.help_text }}</p>
+    {{ form.bank_account_details.errors }}
+  </div>
+
+  <div>
+    <label for="{{ form.whatsapp_group_link.id_for_label }}">WhatsApp Group Link</label>
+    {{ form.whatsapp_group_link }}
+    <p style="font-size:.85rem;color:var(--color-muted);margin:.35rem 0 0;">{{ form.whatsapp_group_link.help_text }}</p>
+    {{ form.whatsapp_group_link.errors }}
+  </div>
+
+  <div>
+    <label for="{{ form.instagram_link.id_for_label }}">Instagram Profile Link</label>
+    {{ form.instagram_link }}
+    {{ form.instagram_link.errors }}
+  </div>
+
+  <div>
+    <label for="{{ form.financial_literacy_video_url.id_for_label }}">Financial Literacy Class (YouTube Link)</label>
+    {{ form.financial_literacy_video_url }}
+    {{ form.financial_literacy_video_url.errors }}
+  </div>
+
+  <button type="submit" class="btn btn--primary">Save Settings</button>
+</form>
+{% endblock %}

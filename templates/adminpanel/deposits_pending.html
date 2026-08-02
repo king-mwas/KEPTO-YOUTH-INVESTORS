@@ -1,0 +1,52 @@
+{% extends "adminpanel/base_admin.html" %}
+
+{% block title %}Pending Deposits – KEPTO Admin{% endblock %}
+
+{% block content %}
+<div class="section-heading" style="text-align:left;margin-bottom:1.5rem;">
+  <h2>Deposits Pending Review</h2>
+</div>
+
+{% if deposits %}
+  <div class="admin-table-wrap">
+    <table class="admin-table">
+      <thead>
+        <tr><th>Member ID</th><th>Name</th><th>Amount</th><th>Reference</th><th>Submitted</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        {% for deposit in deposits %}
+          <tr>
+            <td>{{ deposit.member.member_id }}</td>
+            <td>{{ deposit.member.user.username }}</td>
+            <td>KES {{ deposit.amount }}</td>
+            <td>
+              {% if deposit.transaction_code %}
+                {{ deposit.transaction_code }}
+              {% elif deposit.proof %}
+                <a href="{{ deposit.proof.url }}" target="_blank" rel="noopener">View proof</a>
+              {% else %}
+                <span class="badge badge--pending">Awaiting confirmation</span>
+              {% endif %}
+            </td>
+            <td>{{ deposit.created_at|date:"d M Y, H:i" }}</td>
+            <td>
+              {% if deposit.is_confirmed %}
+                <form method="post" class="row-actions">
+                  {% csrf_token %}
+                  <input type="hidden" name="deposit_id" value="{{ deposit.pk }}">
+                  <button type="submit" name="action" value="approve" class="btn btn--primary">Approve</button>
+                  <button type="submit" name="action" value="reject" class="btn btn--danger-outline">Reject</button>
+                </form>
+              {% else %}
+                <span style="color:var(--color-muted);font-size:.85rem;">Waiting on member</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <div class="placeholder-block">No deposits waiting for review.</div>
+{% endif %}
+{% endblock %}

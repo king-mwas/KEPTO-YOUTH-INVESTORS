@@ -1,0 +1,47 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}KEPTO Admin{% endblock %}</title>
+  <link rel="icon" href="{% static 'branding/kepto-logo.png' %}">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/admin.css' %}">
+</head>
+<body>
+  <header class="admin-topbar">
+    <div class="admin-topbar__inner">
+      <a href="{% url 'adminpanel:dashboard' %}" class="admin-brand">
+        <img src="{% static 'branding/kepto-logo.png' %}" alt="KEPTO">
+        <span>KEPTO Admin</span>
+      </a>
+      <nav class="admin-tabs">
+        <a href="{% url 'adminpanel:dashboard' %}">Overview</a>
+        <a href="{% url 'adminpanel:members_pending' %}">Pending Members</a>
+        <a href="{% url 'adminpanel:deposits_pending' %}">Pending Deposits</a>
+        <a href="{% url 'adminpanel:member_search' %}">Find Member</a>
+        <a href="{% url 'adminpanel:site_settings' %}">Site Settings</a>
+        <a href="/admin/">Django Admin</a>
+      </nav>
+      <form action="{% url 'accounts:logout' %}" method="post" style="margin:0;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn--outline" style="border-color:var(--color-navy);color:var(--color-navy);">Logout</button>
+      </form>
+    </div>
+  </header>
+
+  <main class="admin-main">
+    <div class="container">
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert {% if message.tags == 'success' %}alert--success{% elif message.tags == 'error' %}alert--error{% else %}alert--warning{% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+</body>
+</html>

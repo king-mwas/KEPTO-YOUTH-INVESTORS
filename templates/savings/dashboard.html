@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}My Dashboard – KEPTO{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="container hero__inner">
+    <h1>My Savings</h1>
+    <p>Track your balance and deposit history.</p>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    {% if member.status == 'pending' %}
+      <div class="alert" style="background:#fdf3d9;color:#8a6d1a;">
+        Your membership is pending admin approval. You'll be able to make deposits once it's approved.
+      </div>
+    {% elif member.status == 'rejected' %}
+      <div class="alert" style="background:#fde2e1;color:#b3261e;">
+        Your membership application was not approved. Contact us if you think this is a mistake.
+      </div>
+    {% endif %}
+
+    <div class="card-grid" style="margin-bottom:2rem;">
+      <div class="card">
+        <h3>Current balance</h3>
+        <p style="font-size:2rem;color:var(--color-green-dark);font-weight:700;margin:.25rem 0;">KES {{ balance }}</p>
+        <a href="{% url 'savings:deposit_new' %}" class="btn btn--primary">Make a Deposit</a>
+      </div>
+    </div>
+
+    {% if announcements %}
+      <div class="section-heading" style="text-align:left;margin-bottom:1rem;">
+        <h2>Notifications</h2>
+      </div>
+      <div class="card-grid" style="margin-bottom:2.5rem;">
+        {% for announcement in announcements %}
+          <div class="card">
+            <h3>{{ announcement.title }}</h3>
+            <p>{{ announcement.body }}</p>
+            <p style="color:var(--color-muted);font-size:.85rem;">{{ announcement.created_at|date:"d M Y" }}</p>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if site_settings.youtube_embed_url or site_settings.financial_literacy_video_url or site_settings.whatsapp_group_link %}
+      <div class="section-heading" style="text-align:left;margin-bottom:1rem;">
+        <h2>Community &amp; Resources</h2>
+      </div>
+      <div class="card-grid" style="margin-bottom:2.5rem;">
+        {% if site_settings.youtube_embed_url %}
+          <div class="card">
+            <h3>Financial Literacy Class</h3>
+            <div class="video-embed">
+              <iframe src="{{ site_settings.youtube_embed_url }}" title="Financial literacy class" allowfullscreen></iframe>
+            </div>
+          </div>
+        {% elif site_settings.financial_literacy_video_url %}
+          <div class="card">
+            <h3>Financial Literacy</h3>
+            <p style="color:var(--color-muted);">Watch financial literacy content on our YouTube channel.</p>
+            <a href="{{ site_settings.financial_literacy_video_url }}" target="_blank" rel="noopener" class="btn btn--primary">Watch on YouTube</a>
+          </div>
+        {% endif %}
+        {% if site_settings.whatsapp_group_link %}
+          <div class="card">
+            <h3>Members WhatsApp Group</h3>
+            <p style="color:var(--color-muted);">Connect with other KEPTO members, get updates, and ask questions.</p>
+            <a href="{{ site_settings.whatsapp_group_link }}" target="_blank" rel="noopener" class="btn btn--primary">Join WhatsApp Group</a>
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <div class="section-heading" style="text-align:left;margin-bottom:1rem;">
+      <h2>Deposit history</h2>
+    </div>
+
+    {% if deposits %}
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;">
+          <thead>
+            <tr style="text-align:left;border-bottom:2px solid #e3e8ee;">
+              <th style="padding:.6rem;">Date</th>
+              <th style="padding:.6rem;">Amount (KES)</th>
+              <th style="padding:.6rem;">Reference</th>
+              <th style="padding:.6rem;">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for deposit in deposits %}
+              <tr style="border-bottom:1px solid #e3e8ee;">
+                <td style="padding:.6rem;">{{ deposit.created_at|date:"d M Y, H:i" }}</td>
+                <td style="padding:.6rem;">{{ deposit.amount }}</td>
+                <td style="padding:.6rem;">
+                  {% if deposit.transaction_code %}{{ deposit.transaction_code }}{% elif deposit.proof %}Proof uploaded{% else %}
+                    <a href="{% url 'savings:deposit_confirm' deposit.pk %}">Complete confirmation</a>
+                  {% endif %}
+                </td>
+                <td style="padding:.6rem;">
+                  {% if deposit.status == 'approved' %}
+                    <span style="color:var(--color-green-dark);font-weight:600;">Approved</span>
+                  {% elif deposit.status == 'rejected' %}
+                    <span style="color:#b3261e;font-weight:600;">Rejected</span>
+                  {% else %}
+                    <span style="color:var(--color-gold);font-weight:600;">Pending</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="placeholder-block">You haven't made any deposits yet.</div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
