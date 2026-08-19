@@ -24,6 +24,7 @@
         <a href="{% url 'adminpanel:dashboard' %}" class="{% if active == 'dashboard' %}active{% endif %}">Overview</a>
         <a href="{% url 'adminpanel:members_pending' %}" class="{% if active == 'members_pending' %}active{% endif %}">Pending Members</a>
         <a href="{% url 'adminpanel:deposits_pending' %}" class="{% if active == 'deposits_pending' %}active{% endif %}">Pending Deposits</a>
+        <a href="{% url 'adminpanel:investments' %}" class="{% if active == 'investments' %}active{% endif %}">Investments</a>
         <a href="{% url 'adminpanel:member_search' %}" class="{% if active == 'member_search' %}active{% endif %}">Find Member</a>
         <a href="{% url 'adminpanel:site_settings' %}" class="{% if active == 'site_settings' %}active{% endif %}">Site Settings</a>
         <a href="/admin/">Django Admin</a>

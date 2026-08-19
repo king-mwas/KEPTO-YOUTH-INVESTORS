@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Investments – KEPTO{% endblock %}
+
+{% block extra_head %}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="dash">
+  <div class="wrap">
+    <div class="locked-card">
+      <div class="locked-ic">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2" stroke="#fff" stroke-width="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+      <h2>Investments unlock at Level {{ investment_level }}</h2>
+      <p>Keep saving to reach Level {{ investment_level }} — you're on <strong>Level {{ member.level }}</strong> now.
+         {{ member.next_level_hint }}.</p>
+      <p class="locked-sub">Once unlocked you can put money into share capital, government bonds &amp; T-bills, Kenyan stocks, a liquidity pool, and a money-market fund.</p>
+      <a href="{% url 'savings:dashboard' %}" class="btn-save">Back to dashboard</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

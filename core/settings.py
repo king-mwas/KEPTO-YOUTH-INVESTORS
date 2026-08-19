@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'pages',
     'accounts',
     'savings',
+    'investments',
     'announcements',
     'adminpanel',
 ]

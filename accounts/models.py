@@ -153,6 +153,39 @@ class Member(models.Model):
     def loans_unlocked(self):
         return self.level >= LOANS_LEVEL
 
+    # ------------------------------------------------------------- investments
+
+    @property
+    def savings_committed(self):
+        """Savings currently tied up in share-capital investments (pending or
+        active) — this is money that can't be committed again."""
+        from investments.models import Investment
+        total = self.investments.filter(
+            source=Investment.SAVINGS,
+            status__in=[Investment.PENDING, Investment.ACTIVE],
+        ).aggregate(t=models.Sum('amount'))['t']
+        return total or 0
+
+    @property
+    def savings_available(self):
+        """Savings a member could still move into share capital."""
+        return self.balance - self.savings_committed
+
+    @property
+    def total_invested(self):
+        from investments.models import Investment
+        total = self.investments.filter(status=Investment.ACTIVE).aggregate(
+            t=models.Sum('amount'))['t']
+        return total or 0
+
+    @property
+    def total_investment_returns(self):
+        from investments.models import Investment, InvestmentReturn
+        total = InvestmentReturn.objects.filter(
+            investment__member=self, investment__status=Investment.ACTIVE,
+        ).aggregate(t=models.Sum('amount'))['t']
+        return total or 0
+
     @property
     def next_level_hint(self):
         """What's still needed to reach the next level — whichever of the two

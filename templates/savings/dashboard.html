@@ -108,7 +108,7 @@
           </span>
           <div>
             <p class="t">Investment</p>
-            <p class="s">{% if member.investment_unlocked %}Unlocked — you can invest{% else %}Unlocks at Level {{ investment_level }}{% endif %}</p>
+            <p class="s">{% if member.investment_unlocked %}Unlocked — <a href="{% url 'investments:home' %}" style="color:var(--d-blue-deep);font-weight:700;">open Investments →</a>{% else %}Unlocks at Level {{ investment_level }}{% endif %}</p>
           </div>
           {% if member.investment_unlocked %}<span class="badge">Unlocked</span>{% endif %}
         </div>

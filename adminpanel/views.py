@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 from accounts.models import Industry, Institution, Member
+from investments.models import Investment, InvestmentReturn
 from pages.models import SiteSettings
 from savings.models import Deposit
 
@@ -112,6 +113,50 @@ def deposits_pending(request):
 
     deposits = Deposit.objects.filter(status=Deposit.PENDING).select_related('member', 'member__user')
     return render(request, 'adminpanel/deposits_pending.html', {'deposits': deposits})
+
+
+@staff_member_required
+def investments(request):
+    """Approve/reject pending investments and record returns on active ones."""
+    if request.method == 'POST':
+        action = request.POST.get('action')
+
+        if action in ('approve', 'reject'):
+            inv = get_object_or_404(Investment, pk=request.POST.get('investment_id'))
+            if action == 'approve':
+                # Availability was enforced when the member applied, and a
+                # pending savings commitment already counts against their
+                # available balance, so no re-check is needed here.
+                inv.status = Investment.ACTIVE
+                messages.success(request, f"Approved KES {inv.amount} into {inv.option.name} for {inv.member.member_id}.")
+            else:
+                inv.status = Investment.REJECTED
+                messages.success(request, f"Rejected investment for {inv.member.member_id}.")
+            inv.reviewed_by = request.user
+            inv.reviewed_at = timezone.now()
+            inv.save()
+
+        elif action == 'record_return':
+            inv = get_object_or_404(Investment, pk=request.POST.get('investment_id'))
+            amount = request.POST.get('return_amount')
+            try:
+                amount = float(amount)
+            except (TypeError, ValueError):
+                amount = 0
+            if amount > 0:
+                InvestmentReturn.objects.create(
+                    investment=inv, amount=amount,
+                    note=request.POST.get('return_note', ''), recorded_by=request.user,
+                )
+                messages.success(request, f"Recorded KES {amount:.0f} return for {inv.member.member_id}.")
+            else:
+                messages.error(request, "Enter a return amount greater than zero.")
+
+        return redirect('adminpanel:investments')
+
+    pending = Investment.objects.filter(status=Investment.PENDING).select_related('member', 'member__user', 'option')
+    active = Investment.objects.filter(status=Investment.ACTIVE).select_related('member', 'member__user', 'option')
+    return render(request, 'adminpanel/investments.html', {'pending': pending, 'active': active})
 
 
 @staff_member_required
