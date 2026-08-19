@@ -9,6 +9,32 @@ from .models import Industry, Institution, Member
 PHONE_RE = re.compile(r'^0\d{9}$')
 
 
+class ProfileForm(forms.ModelForm):
+    """Member-editable dashboard profile: display name, savings goal, avatar."""
+
+    class Meta:
+        model = Member
+        fields = ['display_name', 'savings_goal', 'avatar_preset', 'avatar_image']
+        widgets = {
+            'display_name': forms.TextInput(attrs={
+                'placeholder': 'e.g. amina.saves',
+                'maxlength': 30,
+            }),
+            'savings_goal': forms.NumberInput(attrs={'min': 1000, 'step': 500}),
+            'avatar_preset': forms.HiddenInput(),
+        }
+
+    def clean_display_name(self):
+        name = (self.cleaned_data.get('display_name') or '').strip()
+        return name  # the model's RegexValidator enforces the allowed characters
+
+    def clean_savings_goal(self):
+        goal = self.cleaned_data.get('savings_goal')
+        if goal is not None and goal < 1000:
+            raise forms.ValidationError('Set a goal of at least KES 1,000.')
+        return goal
+
+
 class SignUpForm(UserCreationForm):
     email = forms.EmailField(required=True)
     phone_number = forms.CharField(
