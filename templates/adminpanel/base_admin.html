@@ -6,6 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}KEPTO Admin{% endblock %}</title>
   <link rel="icon" href="{% static 'branding/kepto-logo.png' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;500;600;700;800&display=swap">
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/admin.css' %}">
 </head>
@@ -16,14 +19,16 @@
         <img src="{% static 'branding/kepto-logo.png' %}" alt="KEPTO">
         <span>KEPTO Admin</span>
       </a>
+      {% with active=request.resolver_match.url_name %}
       <nav class="admin-tabs">
-        <a href="{% url 'adminpanel:dashboard' %}">Overview</a>
-        <a href="{% url 'adminpanel:members_pending' %}">Pending Members</a>
-        <a href="{% url 'adminpanel:deposits_pending' %}">Pending Deposits</a>
-        <a href="{% url 'adminpanel:member_search' %}">Find Member</a>
-        <a href="{% url 'adminpanel:site_settings' %}">Site Settings</a>
+        <a href="{% url 'adminpanel:dashboard' %}" class="{% if active == 'dashboard' %}active{% endif %}">Overview</a>
+        <a href="{% url 'adminpanel:members_pending' %}" class="{% if active == 'members_pending' %}active{% endif %}">Pending Members</a>
+        <a href="{% url 'adminpanel:deposits_pending' %}" class="{% if active == 'deposits_pending' %}active{% endif %}">Pending Deposits</a>
+        <a href="{% url 'adminpanel:member_search' %}" class="{% if active == 'member_search' %}active{% endif %}">Find Member</a>
+        <a href="{% url 'adminpanel:site_settings' %}" class="{% if active == 'site_settings' %}active{% endif %}">Site Settings</a>
         <a href="/admin/">Django Admin</a>
       </nav>
+      {% endwith %}
       <form action="{% url 'accounts:logout' %}" method="post" style="margin:0;">
         {% csrf_token %}
         <button type="submit" class="btn btn--outline" style="border-color:var(--color-navy);color:var(--color-navy);">Logout</button>
