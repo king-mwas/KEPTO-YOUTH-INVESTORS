@@ -42,6 +42,10 @@ if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
     CSRF_TRUSTED_ORIGINS = [f'https://{RENDER_EXTERNAL_HOSTNAME}']
 
+# Allow all onrender.com domains
+if not DEBUG:
+    ALLOWED_HOSTS.extend(['*.onrender.com', 'onrender.com'])
+
 
 # Application definition
 
