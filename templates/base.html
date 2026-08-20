@@ -104,6 +104,18 @@
     </div>
   </footer>
 
+  <script>
+    document.querySelectorAll('.password-toggle').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.preventDefault();
+        const input = btn.previousElementSibling;
+        const isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+        btn.textContent = isPassword ? '🙈' : '👁️';
+      });
+    });
+  </script>
+
   {% block extra_scripts %}{% endblock %}
 </body>
 </html>
