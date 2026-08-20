@@ -7,9 +7,16 @@ from django.contrib.auth.models import User
 from .models import Industry, Institution, Member
 
 PHONE_RE = re.compile(r'^0\d{9}$')
+USERNAME_RE = re.compile(r'^[A-Za-z0-9@._]+$')
 
 
 class SignUpForm(UserCreationForm):
+    username = forms.CharField(
+        label='Username',
+        max_length=150,
+        widget=forms.TextInput(attrs={'placeholder': 'e.g. your Instagram handle'}),
+        help_text='You can use letters, numbers, and @ . _ (Tip: use your Instagram handle for easy remembering)',
+    )
     email = forms.EmailField(required=True)
     phone_number = forms.CharField(
         label='Phone Number',
@@ -18,6 +25,16 @@ class SignUpForm(UserCreationForm):
         help_text='Your Member ID is generated from this number.',
     )
     member_type = forms.ChoiceField(choices=Member.MEMBER_TYPE_CHOICES, widget=forms.HiddenInput)
+
+    def clean_username(self):
+        username = self.cleaned_data.get('username', '').strip()
+        if not USERNAME_RE.match(username):
+            raise forms.ValidationError(
+                'Username can only contain letters, numbers, and these symbols: @ . _'
+            )
+        if User.objects.filter(username__iexact=username).exists():
+            raise forms.ValidationError('This username is already taken. Try another one.')
+        return username
 
     institution = forms.CharField(
         required=False,

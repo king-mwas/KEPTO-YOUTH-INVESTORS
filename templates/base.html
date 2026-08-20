@@ -114,6 +114,27 @@
         btn.textContent = isPassword ? '🙈' : '👁️';
       });
     });
+
+    const checklist = document.getElementById('password-checklist');
+    if (checklist) {
+      const passwordField = checklist.previousElementSibling.querySelector('input');
+      const checks = {
+        length: v => v.length >= 8,
+        upper: v => /[A-Z]/.test(v),
+        lower: v => /[a-z]/.test(v),
+        number: v => /\d/.test(v),
+        special: v => /[!@#$%^&*(),.?":{}|<>_\-+=\[\]\\;'\/`~]/.test(v),
+      };
+      const updateChecks = () => {
+        const val = passwordField.value;
+        checklist.querySelectorAll('li').forEach(li => {
+          const key = li.dataset.check;
+          li.classList.toggle('valid', checks[key](val));
+        });
+      };
+      passwordField.addEventListener('input', updateChecks);
+      passwordField.addEventListener('focus', updateChecks);
+    }
   </script>
 
   {% block extra_scripts %}{% endblock %}
