@@ -52,11 +52,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'corsheaders',
     'pages',
     'accounts',
     'savings',
     'announcements',
     'adminpanel',
+    'notifications',
+    'mpesa',
 ]
 
 MIDDLEWARE = [
@@ -161,3 +165,55 @@ LOGIN_REDIRECT_URL = 'accounts:post_login_redirect'
 LOGOUT_REDIRECT_URL = 'pages:home'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# M-Pesa Configuration
+MPESA_SANDBOX = os.environ.get('MPESA_SANDBOX', 'True') == 'True'
+MPESA_CONSUMER_KEY = os.environ.get('MPESA_CONSUMER_KEY', '')
+MPESA_CONSUMER_SECRET = os.environ.get('MPESA_CONSUMER_SECRET', '')
+MPESA_BUSINESS_SHORTCODE = os.environ.get('MPESA_BUSINESS_SHORTCODE', '')
+MPESA_PASSKEY = os.environ.get('MPESA_PASSKEY', '')
+
+# REST Framework Configuration
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
+}
+
+# CORS Configuration
+CORS_ALLOWED_ORIGINS = [h.strip() for h in os.environ.get('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://localhost:8000').split(',') if h.strip()]
+
+# Caching Configuration
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'kepto-cache',
+    }
+}
+
+# Logging Configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'mpesa': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+        'notifications': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+    },
+}
