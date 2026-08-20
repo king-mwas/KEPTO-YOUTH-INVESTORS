@@ -1,0 +1,429 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Make a Deposit - KEPTO{% endblock %}
+
+{% block extra_head %}
+<style>
+  .deposit-container {
+    max-width: 600px;
+    margin: 60px auto;
+    padding: 20px;
+  }
+
+  .deposit-header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .deposit-header h1 {
+    font-size: 2em;
+    margin-bottom: 10px;
+    color: #333;
+  }
+
+  .deposit-header p {
+    font-size: 1.1em;
+    color: #666;
+  }
+
+  .member-info {
+    background: #f5f5f5;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 30px;
+  }
+
+  .member-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+
+  .member-info-row:last-child {
+    margin-bottom: 0;
+  }
+
+  .member-info label {
+    font-weight: 600;
+    color: #555;
+  }
+
+  .member-info-value {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .member-id {
+    font-family: monospace;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #007bff;
+  }
+
+  .copy-btn {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background 0.3s;
+  }
+
+  .copy-btn:hover {
+    background: #0056b3;
+  }
+
+  .copy-btn.copied {
+    background: #28a745;
+  }
+
+  .deposit-form {
+    background: white;
+    border-radius: 8px;
+    padding: 30px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333;
+  }
+
+  .form-group input[type="number"],
+  .form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1em;
+    font-family: inherit;
+  }
+
+  .form-group input[type="number"]:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+  }
+
+  .form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+
+  .option-separator {
+    text-align: center;
+    margin: 30px 0;
+    color: #999;
+    font-weight: 600;
+  }
+
+  .option-separator::before,
+  .option-separator::after {
+    content: '';
+    display: inline-block;
+    width: 100px;
+    height: 1px;
+    background: #ddd;
+    vertical-align: middle;
+    margin: 0 10px;
+  }
+
+  .button-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-top: 30px;
+  }
+
+  @media (max-width: 600px) {
+    .button-group {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .btn-submit {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 4px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .btn-prompt {
+    background: #28a745;
+    color: white;
+  }
+
+  .btn-prompt:hover {
+    background: #218838;
+  }
+
+  .btn-approve {
+    background: #6c757d;
+    color: white;
+  }
+
+  .btn-approve:hover {
+    background: #5a6268;
+  }
+
+  .loading {
+    display: none;
+    text-align: center;
+    color: #666;
+  }
+
+  .loading.show {
+    display: block;
+  }
+
+  .alert {
+    padding: 12px 16px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    display: none;
+  }
+
+  .alert.show {
+    display: block;
+  }
+
+  .alert-success {
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+  }
+
+  .alert-danger {
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+  }
+
+  .alert-info {
+    background: #d1ecf1;
+    border: 1px solid #bee5eb;
+    color: #0c5460;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="deposit-container">
+  <div class="deposit-header">
+    <h1>💰 Make a Deposit</h1>
+    <p>Grow your savings with KEPTO</p>
+  </div>
+
+  <div class="member-info">
+    <div class="member-info-row">
+      <label>Your Member ID</label>
+      <div class="member-info-value">
+        <span class="member-id" id="memberId">{{ member_id }}</span>
+        <button class="copy-btn" id="copyBtn" onclick="copyMemberId()">📋 Copy</button>
+      </div>
+    </div>
+    <div class="member-info-row">
+      <label>Phone Number</label>
+      <span>{{ phone }}</span>
+    </div>
+  </div>
+
+  <div id="alert" class="alert"></div>
+
+  <div class="deposit-form">
+    <form id="depositForm">
+      {% csrf_token %}
+
+      <div class="form-group">
+        <label for="amount">Deposit Amount (KES)</label>
+        <input type="number" id="amount" name="amount" min="1" step="0.01" placeholder="Enter amount" required>
+      </div>
+
+      <!-- Option 1: Immediate STK Push -->
+      <div>
+        <div class="button-group">
+          <button type="button" class="btn-submit btn-prompt" onclick="submitStkPush(event)">
+            📱 STK Push (Instant)
+          </button>
+          <button type="button" class="btn-submit btn-approve" onclick="showApprovalForm(event)">
+            ✉️ Manual Deposit (Admin Review)
+          </button>
+        </div>
+      </div>
+
+      <!-- Option 2: Manual Approval (Initially Hidden) -->
+      <div id="approvalSection" style="display: none; margin-top: 30px;">
+        <div class="option-separator">Manual Deposit Option</div>
+
+        <div class="form-group">
+          <label for="message">Payment Details / Proof</label>
+          <textarea
+            id="message"
+            name="message"
+            placeholder="Paste your payment proof or transaction details here (bank transfer receipt, M-Pesa screenshot, bank name, account number, etc.)"
+            required></textarea>
+          <small style="color: #666;">Provide clear details so admins can verify your payment</small>
+        </div>
+
+        <div class="button-group">
+          <button type="button" class="btn-submit btn-approve" onclick="submitApprovalRequest(event)">
+            ✅ Submit for Review
+          </button>
+          <button type="button" class="btn-submit" style="background: #ccc; color: #333;" onclick="hideApprovalForm(event)">
+            ✕ Cancel
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <div id="loading" class="loading">
+      <p>⏳ Processing your request...</p>
+    </div>
+  </div>
+</div>
+
+<script>
+function copyMemberId() {
+  const memberId = document.getElementById('memberId').textContent;
+  navigator.clipboard.writeText(memberId).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = '✅ Copied';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = '📋 Copy';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+
+function showAlert(message, type = 'info') {
+  const alertEl = document.getElementById('alert');
+  alertEl.textContent = message;
+  alertEl.className = `alert show alert-${type}`;
+}
+
+function hideAlert() {
+  document.getElementById('alert').classList.remove('show');
+}
+
+function showLoading() {
+  document.getElementById('loading').classList.add('show');
+}
+
+function hideLoading() {
+  document.getElementById('loading').classList.remove('show');
+}
+
+function showApprovalForm(e) {
+  e.preventDefault();
+  document.getElementById('approvalSection').style.display = 'block';
+  document.getElementById('message').focus();
+}
+
+function hideApprovalForm(e) {
+  e.preventDefault();
+  document.getElementById('approvalSection').style.display = 'none';
+}
+
+function submitStkPush(e) {
+  e.preventDefault();
+
+  const amount = document.getElementById('amount').value;
+  if (!amount || amount <= 0) {
+    showAlert('Please enter a valid amount', 'danger');
+    return;
+  }
+
+  showLoading();
+  hideAlert();
+
+  fetch('{% url "savings:initiate_stk_push" %}', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+    },
+    body: JSON.stringify({ amount: parseFloat(amount) })
+  })
+  .then(response => response.json())
+  .then(data => {
+    hideLoading();
+    if (data.success) {
+      showAlert('✅ ' + data.message, 'success');
+      setTimeout(() => {
+        window.location.href = '{% url "savings:dashboard" %}';
+      }, 2000);
+    } else {
+      showAlert('❌ Error: ' + data.error, 'danger');
+    }
+  })
+  .catch(error => {
+    hideLoading();
+    showAlert('❌ Error: ' + error.message, 'danger');
+  });
+}
+
+function submitApprovalRequest(e) {
+  e.preventDefault();
+
+  const amount = document.getElementById('amount').value;
+  const message = document.getElementById('message').value;
+
+  if (!amount || amount <= 0) {
+    showAlert('Please enter a valid amount', 'danger');
+    return;
+  }
+
+  if (!message || message.length < 10) {
+    showAlert('Please provide payment details (minimum 10 characters)', 'danger');
+    return;
+  }
+
+  showLoading();
+  hideAlert();
+
+  fetch('{% url "savings:submit_approval_request" %}', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+    },
+    body: JSON.stringify({
+      amount: parseFloat(amount),
+      message: message
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    hideLoading();
+    if (data.success) {
+      showAlert('✅ ' + data.message, 'success');
+      setTimeout(() => {
+        window.location.href = '{% url "savings:dashboard" %}';
+      }, 2000);
+    } else {
+      showAlert('❌ Error: ' + data.error, 'danger');
+    }
+  })
+  .catch(error => {
+    hideLoading();
+    showAlert('❌ Error: ' + error.message, 'danger');
+  });
+}
+</script>
+{% endblock %}

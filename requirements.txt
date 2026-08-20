@@ -10,3 +10,6 @@ celery==5.4.0
 redis==5.0.1
 djangorestframework==3.14.0
 django-cors-headers==4.3.1
+twilio==9.2.2
+google-auth-oauthlib==1.2.0
+google-auth-httplib2==0.2.0

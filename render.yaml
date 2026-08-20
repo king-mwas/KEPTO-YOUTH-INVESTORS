@@ -1,0 +1,55 @@
+databases:
+  - name: kepto-postgres
+    databaseName: kepto_db
+    user: kepto_user
+    plan: free
+
+services:
+  - type: web
+    name: kepto-backend
+    env: python
+    plan: free
+    buildCommand: >
+      pip install -r requirements.txt &&
+      python manage.py collectstatic --noinput &&
+      python manage.py migrate
+    startCommand: gunicorn core.wsgi:application
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.5
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: "*.onrender.com"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: kepto-postgres
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: MPESA_SANDBOX
+        value: "True"
+      - key: MPESA_CONSUMER_KEY
+        sync: false
+      - key: MPESA_CONSUMER_SECRET
+        sync: false
+      - key: MPESA_BUSINESS_SHORTCODE
+        sync: false
+      - key: MPESA_PASSKEY
+        sync: false
+      - key: MPESA_CALLBACK_URL
+        value: "https://yourdomain.onrender.com/api/mpesa/callback/"
+      - key: EMAIL_HOST_USER
+        value: "keptoinvestor@gmail.com"
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      - key: ADMIN_EMAIL
+        value: "keptoinvestor@gmail.com"
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_PHONE_NUMBER
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
+        value: "https://yourdomain.com"
