@@ -59,7 +59,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'pages',
-    'accounts',
+    'accounts.apps.AccountsConfig',
     'savings',
     'announcements',
     'adminpanel',
