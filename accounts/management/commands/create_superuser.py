@@ -15,9 +15,17 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING('No ADMIN_PASSWORD environment variable set. Skipping superuser creation.'))
             return
 
-        if User.objects.filter(username=username).exists():
-            self.stdout.write(self.style.SUCCESS(f'Superuser "{username}" already exists.'))
-            return
+        user, created = User.objects.get_or_create(
+            username=username,
+            defaults={'email': email, 'is_staff': True, 'is_superuser': True},
+        )
+        user.email = email
+        user.is_staff = True
+        user.is_superuser = True
+        user.set_password(password)
+        user.save()
 
-        User.objects.create_superuser(username, email, password)
-        self.stdout.write(self.style.SUCCESS(f'Superuser "{username}" created successfully.'))
+        if created:
+            self.stdout.write(self.style.SUCCESS(f'Superuser "{username}" created successfully.'))
+        else:
+            self.stdout.write(self.style.SUCCESS(f'Superuser "{username}" password reset successfully.'))
