@@ -192,7 +192,36 @@
       <input type="text" name="goal_label" value="{{ member.savings_goal_label|default:'' }}" placeholder="e.g. Laptop, School Fees, Business capital" maxlength="100">
 
       <label style="margin-top:1rem;">Goal amount (KES)</label>
-      <input type="number" name="goal_amount" value="{{ member.savings_goal|default:'' }}" placeholder="e.g. 10000" min="1" step="100" required>
+      <input type="text" inputmode="decimal" name="goal_amount"
+             value="{{ member.savings_goal|default:'' }}"
+             placeholder="e.g. 10,000 or 388954 or 10 million"
+             pattern="[0-9,\.\s]+" required
+             id="goal-amount-input">
+      <p style="font-size:.8rem;color:var(--sap-muted);margin:.3rem 0 0;">Any amount — commas and spaces are allowed. Example: 388954 or 10,000,000</p>
+      <script>
+        (function() {
+          var input = document.getElementById('goal-amount-input');
+          if (!input) return;
+          function format(val) {
+            var digits = val.replace(/[^0-9]/g, '');
+            if (!digits) return '';
+            return Number(digits).toLocaleString('en-US');
+          }
+          input.addEventListener('input', function() {
+            var cursor = input.selectionStart;
+            var before = input.value.slice(0, cursor).replace(/[^0-9]/g, '').length;
+            input.value = format(input.value);
+            var digitCount = 0;
+            var newCursor = 0;
+            for (var i = 0; i < input.value.length && digitCount < before; i++) {
+              if (/[0-9]/.test(input.value[i])) digitCount++;
+              newCursor = i + 1;
+            }
+            input.setSelectionRange(newCursor, newCursor);
+          });
+          input.value = format(input.value);
+        })();
+      </script>
 
       <div style="display:flex;gap:.5rem;margin-top:1.25rem;">
         <button type="submit" class="sap-modal-btn sap-modal-btn--primary">Save Goal</button>

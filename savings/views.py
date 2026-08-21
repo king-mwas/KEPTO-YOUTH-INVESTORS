@@ -1,6 +1,6 @@
 import json
 from datetime import timedelta
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -98,9 +98,11 @@ def _calculate_streak(approved_deposits):
 def set_goal(request):
     member = request.user.member
     if request.method == 'POST':
+        raw = request.POST.get('goal_amount', '0') or '0'
+        cleaned = raw.replace(',', '').replace(' ', '').strip()
+        label = request.POST.get('goal_label', '').strip()[:100]
         try:
-            amount = Decimal(request.POST.get('goal_amount', '0') or '0')
-            label = request.POST.get('goal_label', '').strip()[:100]
+            amount = Decimal(cleaned)
             if amount > 0:
                 member.savings_goal = amount
                 member.savings_goal_label = label
@@ -111,8 +113,8 @@ def set_goal(request):
                 member.savings_goal_label = ''
                 member.save()
                 messages.info(request, 'Savings goal cleared.')
-        except (ValueError, TypeError):
-            messages.error(request, 'Please enter a valid amount.')
+        except (ValueError, TypeError, InvalidOperation):
+            messages.error(request, 'Please enter a valid amount (numbers only, e.g. 10000 or 10,000).')
     return redirect('savings:dashboard')
 
 

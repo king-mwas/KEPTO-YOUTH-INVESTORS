@@ -63,8 +63,8 @@ class Member(models.Model):
     industry = models.ForeignKey(Industry, on_delete=models.SET_NULL, null=True, blank=True)
     business_name = models.CharField(max_length=150, blank=True)
 
-    savings_goal = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True,
-                                       help_text='Optional savings target in KES')
+    savings_goal = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True,
+                                       help_text='Optional savings target in KES (any amount)')
     savings_goal_label = models.CharField(max_length=100, blank=True,
                                           help_text='What are you saving for? e.g. "Laptop", "School Fees"')
 
