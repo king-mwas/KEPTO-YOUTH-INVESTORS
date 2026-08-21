@@ -38,7 +38,13 @@ class DepositApprovalRequestAdmin(admin.ModelAdmin):
     list_display = ['member', 'amount', 'status', 'created_at', 'reviewed_by']
     list_filter = ['status', 'created_at']
     search_fields = ['member__member_id', 'member__user__username', 'message']
-    readonly_fields = ['created_at', 'reviewed_at', 'reviewed_by', 'message']
+    readonly_fields = ['created_at', 'reviewed_at', 'reviewed_by']
+
+    def get_readonly_fields(self, request, obj=None):
+        # For existing records, also make message readonly (member's original submission)
+        if obj:
+            return list(self.readonly_fields) + ['message']
+        return self.readonly_fields
     actions = ['approve_requests', 'reject_requests']
 
     fieldsets = (
