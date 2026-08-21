@@ -159,6 +159,11 @@ MEDIA_ROOT = BASE_DIR / 'media'
 BRAND_NAME = 'KEPTO'
 BRAND_TAGLINE = 'Learn. Save. Build. Grow.'
 
+AUTHENTICATION_BACKENDS = [
+    'accounts.auth_backends.CaseInsensitiveModelBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
 LOGIN_URL = 'accounts:login'
 LOGIN_REDIRECT_URL = 'accounts:post_login_redirect'
 LOGOUT_REDIRECT_URL = 'pages:home'
