@@ -1,9 +1,13 @@
 import json
+from datetime import timedelta
+from decimal import Decimal
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import JsonResponse
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 from django.core.mail import send_mail
 from django.conf import settings
@@ -19,15 +23,97 @@ from .models import Deposit, DepositApprovalRequest
 @login_required
 def dashboard(request):
     member = request.user.member
-    balance = member.deposits.filter(status=Deposit.APPROVED).aggregate(total=Sum('amount'))['total'] or 0
-    deposits = member.deposits.all()
+    approved_deposits = member.deposits.filter(status=Deposit.APPROVED)
+    balance = approved_deposits.aggregate(total=Sum('amount'))['total'] or Decimal('0')
+    deposits = member.deposits.all()[:10]
+    total_deposits = approved_deposits.count()
+
+    # This month
+    now = timezone.now()
+    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    this_month_deposits = approved_deposits.filter(created_at__gte=month_start)
+    this_month_amount = this_month_deposits.aggregate(total=Sum('amount'))['total'] or Decimal('0')
+    this_month_count = this_month_deposits.count()
+
+    # Goal progress
+    goal_amount = member.savings_goal
+    goal_pct = 0
+    goal_remaining = None
+    if goal_amount and goal_amount > 0:
+        goal_pct = min(100, int((balance / goal_amount) * 100))
+        goal_remaining = max(Decimal('0'), goal_amount - balance)
+
+    # Gamification: level = 1 + (approved deposits / 3)
+    level = 1 + (total_deposits // 3)
+    deposits_to_next_level = 3 - (total_deposits % 3)
+
+    # Streak: count consecutive weeks with at least one deposit
+    streak_weeks = _calculate_streak(approved_deposits)
+
+    # Initials for avatar
+    initials = (member.user.first_name[:1] + (member.user.last_name[:1] if member.user.last_name else '')).upper() or member.user.username[:2].upper()
+    display_name = member.user.first_name or member.user.username
+
     announcements = Announcement.objects.filter(is_active=True)[:5]
     return render(request, 'savings/dashboard.html', {
         'balance': balance,
         'deposits': deposits,
+        'total_deposits': total_deposits,
+        'this_month_amount': this_month_amount,
+        'this_month_count': this_month_count,
+        'goal_amount': goal_amount,
+        'goal_label': member.savings_goal_label,
+        'goal_pct': goal_pct,
+        'goal_remaining': goal_remaining,
+        'level': level,
+        'deposits_to_next_level': deposits_to_next_level,
+        'streak_weeks': streak_weeks,
+        'initials': initials,
+        'display_name': display_name,
         'announcements': announcements,
         'member': member,
     })
+
+
+def _calculate_streak(approved_deposits):
+    weeks = set()
+    for d in approved_deposits.order_by('-created_at'):
+        year, week, _ = d.created_at.isocalendar()
+        weeks.add((year, week))
+    if not weeks:
+        return 0
+    now = timezone.now()
+    current_year, current_week, _ = now.isocalendar()
+    streak = 0
+    y, w = current_year, current_week
+    while (y, w) in weeks:
+        streak += 1
+        # go to previous week
+        prev = timezone.datetime(y, 1, 1) + timedelta(weeks=w - 2)
+        y, w, _ = prev.isocalendar()
+    return streak
+
+
+@login_required
+def set_goal(request):
+    member = request.user.member
+    if request.method == 'POST':
+        try:
+            amount = Decimal(request.POST.get('goal_amount', '0') or '0')
+            label = request.POST.get('goal_label', '').strip()[:100]
+            if amount > 0:
+                member.savings_goal = amount
+                member.savings_goal_label = label
+                member.save()
+                messages.success(request, f'Goal set: KES {amount:,.0f}{" for " + label if label else ""}!')
+            else:
+                member.savings_goal = None
+                member.savings_goal_label = ''
+                member.save()
+                messages.info(request, 'Savings goal cleared.')
+        except (ValueError, TypeError):
+            messages.error(request, 'Please enter a valid amount.')
+    return redirect('savings:dashboard')
 
 
 @login_required

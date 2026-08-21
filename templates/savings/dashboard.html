@@ -1,121 +1,206 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}My Dashboard – KEPTO{% endblock %}
 
+{% block extra_head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="{% static 'css/sapphire-dashboard.css' %}">
+{% endblock %}
+
 {% block content %}
-<section class="hero">
-  <div class="container hero__inner">
-    <h1>My Savings</h1>
-    <p>Track your balance and deposit history.</p>
+<div class="sap-wrap">
+
+  {% if member.status == 'pending' %}
+    <div class="sap-alert sap-alert--pending">
+      Your membership is pending admin approval. You'll be able to make deposits once it's approved.
+    </div>
+  {% elif member.status == 'rejected' %}
+    <div class="sap-alert sap-alert--rejected">
+      Your membership application was not approved. Contact us if you think this is a mistake.
+    </div>
+  {% endif %}
+
+  <div class="sap-top">
+    <div class="sap-greet">Hey, <b>{{ display_name }}</b> — keep it growing!</div>
+    <div class="sap-top-right">
+      <span class="sap-avatar">{{ initials }}</span>
+    </div>
   </div>
-</section>
 
-<section>
-  <div class="container">
-    {% if member.status == 'pending' %}
-      <div class="alert" style="background:#fdf3d9;color:#8a6d1a;">
-        Your membership is pending admin approval. You'll be able to make deposits once it's approved.
-      </div>
-    {% elif member.status == 'rejected' %}
-      <div class="alert" style="background:#fde2e1;color:#b3261e;">
-        Your membership application was not approved. Contact us if you think this is a mistake.
-      </div>
-    {% endif %}
+  <div class="sap-hero">
+    <span class="sap-blob b1"></span>
+    <span class="sap-blob b2"></span>
+    <svg class="sap-leaf" viewBox="0 0 24 24" fill="none"><path d="M4 20c0-8 6-14 16-16C18 12 12 18 4 20Z" fill="#fff" opacity=".9"/></svg>
+    <p class="sap-lbl">Current balance</p>
+    <p class="sap-amt"><span class="sap-cur">KES</span>{{ balance|floatformat:0 }}</p>
 
-    <div class="card-grid" style="margin-bottom:2rem;">
-      <div class="card">
-        <h3>Current balance</h3>
-        <p style="font-size:2rem;color:var(--color-green-dark);font-weight:700;margin:.25rem 0;">KES {{ balance }}</p>
-        <a href="{% url 'savings:deposit_new' %}" class="btn btn--primary">Make a Deposit</a>
-      </div>
-    </div>
-
-    {% if announcements %}
-      <div class="section-heading" style="text-align:left;margin-bottom:1rem;">
-        <h2>Notifications</h2>
-      </div>
-      <div class="card-grid" style="margin-bottom:2.5rem;">
-        {% for announcement in announcements %}
-          <div class="card">
-            <h3>{{ announcement.title }}</h3>
-            <p>{{ announcement.body }}</p>
-            <p style="color:var(--color-muted);font-size:.85rem;">{{ announcement.created_at|date:"d M Y" }}</p>
-          </div>
-        {% endfor %}
-      </div>
-    {% endif %}
-
-    {% if site_settings.youtube_embed_url or site_settings.financial_literacy_video_url or site_settings.whatsapp_group_link %}
-      <div class="section-heading" style="text-align:left;margin-bottom:1rem;">
-        <h2>Community &amp; Resources</h2>
-      </div>
-      <div class="card-grid" style="margin-bottom:2.5rem;">
-        {% if site_settings.youtube_embed_url %}
-          <div class="card">
-            <h3>Financial Literacy Class</h3>
-            <div class="video-embed">
-              <iframe src="{{ site_settings.youtube_embed_url }}" title="Financial literacy class" allowfullscreen></iframe>
-            </div>
-          </div>
-        {% elif site_settings.financial_literacy_video_url %}
-          <div class="card">
-            <h3>Financial Literacy</h3>
-            <p style="color:var(--color-muted);">Watch financial literacy content on our YouTube channel.</p>
-            <a href="{{ site_settings.financial_literacy_video_url }}" target="_blank" rel="noopener" class="btn btn--primary">Watch on YouTube</a>
-          </div>
+    {% if goal_amount %}
+      <div class="sap-goal">
+        <div class="sap-goal-row">
+          <span class="sap-pct">{{ goal_pct }}% there</span>
+          <span class="sap-tgt">Goal · KES {{ goal_amount|floatformat:0 }}{% if goal_label %} · {{ goal_label }}{% endif %}</span>
+        </div>
+        <div class="sap-track"><span style="width: {{ goal_pct }}%;"></span></div>
+        {% if goal_remaining %}
+          <p class="sap-goal-remaining">KES {{ goal_remaining|floatformat:0 }} to go</p>
+        {% else %}
+          <p class="sap-goal-remaining">🎉 Goal reached! Congrats!</p>
         {% endif %}
-        {% if site_settings.whatsapp_group_link %}
-          <div class="card">
-            <h3>Members WhatsApp Group</h3>
-            <p style="color:var(--color-muted);">Connect with other KEPTO members, get updates, and ask questions.</p>
-            <a href="{{ site_settings.whatsapp_group_link }}" target="_blank" rel="noopener" class="btn btn--primary">Join WhatsApp Group</a>
-          </div>
-        {% endif %}
-      </div>
-    {% endif %}
-
-    <div class="section-heading" style="text-align:left;margin-bottom:1rem;">
-      <h2>Deposit history</h2>
-    </div>
-
-    {% if deposits %}
-      <div style="overflow-x:auto;">
-        <table style="width:100%;border-collapse:collapse;">
-          <thead>
-            <tr style="text-align:left;border-bottom:2px solid #e3e8ee;">
-              <th style="padding:.6rem;">Date</th>
-              <th style="padding:.6rem;">Amount (KES)</th>
-              <th style="padding:.6rem;">Reference</th>
-              <th style="padding:.6rem;">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for deposit in deposits %}
-              <tr style="border-bottom:1px solid #e3e8ee;">
-                <td style="padding:.6rem;">{{ deposit.created_at|date:"d M Y, H:i" }}</td>
-                <td style="padding:.6rem;">{{ deposit.amount }}</td>
-                <td style="padding:.6rem;">
-                  {% if deposit.transaction_code %}{{ deposit.transaction_code }}{% elif deposit.proof %}Proof uploaded{% else %}
-                    <a href="{% url 'savings:deposit_confirm' deposit.pk %}">Complete confirmation</a>
-                  {% endif %}
-                </td>
-                <td style="padding:.6rem;">
-                  {% if deposit.status == 'approved' %}
-                    <span style="color:var(--color-green-dark);font-weight:600;">Approved</span>
-                  {% elif deposit.status == 'rejected' %}
-                    <span style="color:#b3261e;font-weight:600;">Rejected</span>
-                  {% else %}
-                    <span style="color:var(--color-gold);font-weight:600;">Pending</span>
-                  {% endif %}
-                </td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
       </div>
     {% else %}
-      <div class="placeholder-block">You haven't made any deposits yet.</div>
+      <div class="sap-goal">
+        <button type="button" class="sap-set-goal-btn" onclick="document.getElementById('goal-modal').classList.add('open')">
+          + Set a savings goal
+        </button>
+      </div>
+    {% endif %}
+
+    {% if member.status == 'approved' %}
+      <a class="sap-cta" href="{% url 'savings:deposit_page' %}">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+        Make a Deposit
+      </a>
     {% endif %}
   </div>
-</section>
+
+  <div class="sap-game">
+    <div class="sap-chip sap-chip--lvl">
+      <span class="sap-ic">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 21V11m0 0c0-3.3-2.7-6-6-6 0 3.3 2.7 6 6 6Zm0 0c0-3.3 2.7-6 6-6 0 3.3-2.7 6-6 6Z" stroke="#1E44C9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      <div>
+        <p class="sap-chip-t">Level {{ level }} Saver</p>
+        <p class="sap-chip-s">{{ deposits_to_next_level }} deposit{{ deposits_to_next_level|pluralize }} to Level {{ level|add:1 }}</p>
+      </div>
+    </div>
+    <div class="sap-chip sap-chip--streak">
+      <span class="sap-ic">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 3c1 3-1 4-1 6a3 3 0 0 0 6 0c0-1-.4-2-1-3 3 2 4 5 4 8a8 8 0 1 1-16 0c0-4 3-7 4-8 0 2 1 3 2 3 .5-3-1-5-2-6Z" fill="#FFB020"/></svg>
+      </span>
+      <div>
+        <p class="sap-chip-t">{{ streak_weeks }}-week streak</p>
+        <p class="sap-chip-s">{% if streak_weeks > 0 %}Keep it going!{% else %}Start your streak today{% endif %}</p>
+      </div>
+    </div>
+    <div class="sap-chip sap-chip--rank">
+      <span class="sap-ic">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M8 21h8M12 17v4M6 4h12v4a6 6 0 0 1-12 0V4Zm12 1h2a2 2 0 0 1 0 4h-2M6 5H4a2 2 0 0 0 0 4h2" stroke="#0284C7" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      <div>
+        <p class="sap-chip-t">Member #{{ member.member_id }}</p>
+        <p class="sap-chip-s">KEPTO Investor</p>
+      </div>
+    </div>
+  </div>
+
+  {% if goal_amount and goal_remaining %}
+    <div class="sap-nudge">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z" fill="#FF6B4A"/></svg>
+      <span>Save <b>KES {{ goal_remaining|floatformat:0 }}</b> more to reach your goal{% if goal_label %} — <b>{{ goal_label }}</b>{% endif %}!</span>
+    </div>
+  {% endif %}
+
+  <div class="sap-stats">
+    <div class="sap-stat">
+      <p class="sap-stat-k">Total saved</p>
+      <p class="sap-stat-v">KES {{ balance|floatformat:0 }}</p>
+    </div>
+    <div class="sap-stat">
+      <p class="sap-stat-k">Deposits</p>
+      <p class="sap-stat-v">{{ total_deposits }}</p>
+    </div>
+    <div class="sap-stat">
+      <p class="sap-stat-k">This month</p>
+      <p class="sap-stat-v">KES {{ this_month_amount|floatformat:0 }} {% if this_month_count %}<span class="sap-up">▲ {{ this_month_count }}</span>{% endif %}</p>
+    </div>
+  </div>
+
+  <div class="sap-sec-head">
+    <h2>Deposit history</h2>
+    {% if member.savings_goal %}
+      <a href="#" onclick="event.preventDefault();document.getElementById('goal-modal').classList.add('open');">Edit goal</a>
+    {% endif %}
+  </div>
+  <div class="sap-card">
+    {% if deposits %}
+      <table class="sap-dep">
+        <thead>
+          <tr><th>Date</th><th>Amount</th><th>Reference</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          {% for d in deposits %}
+            <tr>
+              <td>{{ d.created_at|date:"d M Y" }}</td>
+              <td class="sap-amt-cell">KES {{ d.amount|floatformat:0 }}</td>
+              <td>
+                {% if d.transaction_code %}
+                  <span class="sap-mpesa">M-PESA</span><span class="sap-ref">{{ d.transaction_code }}</span>
+                {% elif d.proof %}
+                  <span class="sap-ref">Proof uploaded</span>
+                {% else %}
+                  <span class="sap-ref">—</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if d.status == 'approved' %}
+                  <span class="sap-pill sap-pill--ok">Approved</span>
+                {% elif d.status == 'pending' %}
+                  <span class="sap-pill sap-pill--pend">Pending</span>
+                {% else %}
+                  <span class="sap-pill sap-pill--rej">Rejected</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <div style="padding:2rem;text-align:center;color:var(--sap-muted);">
+        No deposits yet. Make your first one!
+      </div>
+    {% endif %}
+  </div>
+
+  {% if announcements %}
+    <div class="sap-sec-head" style="margin-top:2rem;">
+      <h2>Announcements</h2>
+    </div>
+    <div class="sap-community">
+      {% for ann in announcements|slice:":2" %}
+        <div class="sap-ccard sap-ccard--fl">
+          <h3>{{ ann.title }}</h3>
+          <p>{{ ann.body|truncatechars:100 }}</p>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <p class="sap-footnote">KEPTO — Learn. Save. Build. Grow.</p>
+</div>
+
+<div id="goal-modal" class="sap-modal">
+  <div class="sap-modal-card">
+    <button type="button" class="sap-modal-close" onclick="document.getElementById('goal-modal').classList.remove('open')">×</button>
+    <h3>Set your savings goal</h3>
+    <p style="color:var(--sap-muted);font-size:.9rem;margin:.25rem 0 1rem;">Track your progress toward something meaningful.</p>
+    <form method="post" action="{% url 'savings:set_goal' %}">
+      {% csrf_token %}
+      <label>What are you saving for?</label>
+      <input type="text" name="goal_label" value="{{ member.savings_goal_label|default:'' }}" placeholder="e.g. Laptop, School Fees, Business capital" maxlength="100">
+
+      <label style="margin-top:1rem;">Goal amount (KES)</label>
+      <input type="number" name="goal_amount" value="{{ member.savings_goal|default:'' }}" placeholder="e.g. 10000" min="1" step="100" required>
+
+      <div style="display:flex;gap:.5rem;margin-top:1.25rem;">
+        <button type="submit" class="sap-modal-btn sap-modal-btn--primary">Save Goal</button>
+        {% if member.savings_goal %}
+          <button type="submit" name="goal_amount" value="0" class="sap-modal-btn sap-modal-btn--clear">Clear</button>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+</div>
 {% endblock %}
