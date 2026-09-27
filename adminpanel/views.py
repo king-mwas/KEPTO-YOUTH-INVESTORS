@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.models import User
 from django.db.models import Q, Sum
 from django.db.models.functions import TruncMonth
 from django.shortcuts import get_object_or_404, redirect, render
@@ -14,6 +15,11 @@ from .forms import SiteSettingsForm
 # A pending deposit is only ready for admin review once the member has
 # actually submitted a transaction code or proof of payment.
 UNCONFIRMED = Q(transaction_code='') & (Q(proof='') | Q(proof__isnull=True))
+
+
+def _incomplete_signups():
+    """Non-staff logins with no Member profile — sign-ups that broke halfway."""
+    return User.objects.filter(member__isnull=True, is_staff=False, is_superuser=False)
 
 
 def _group_breakdown(model, relation_name):
@@ -34,7 +40,7 @@ def _group_breakdown(model, relation_name):
 def dashboard(request):
     total_capital = Deposit.objects.filter(status=Deposit.APPROVED).aggregate(total=Sum('amount'))['total'] or 0
     total_members = Member.objects.filter(status=Member.APPROVED).count()
-    pending_members_count = Member.objects.filter(status=Member.PENDING).count()
+    pending_members_count = Member.objects.filter(status=Member.PENDING).count() + _incomplete_signups().count()
     pending_deposits_count = Deposit.objects.filter(status=Deposit.PENDING).exclude(UNCONFIRMED).count()
 
     institution_groups = _group_breakdown(Institution, 'institution')
@@ -69,6 +75,13 @@ def dashboard(request):
 
 @staff_member_required
 def members_pending(request):
+    if request.method == 'POST' and request.POST.get('action') == 'remove_incomplete':
+        user = get_object_or_404(_incomplete_signups(), pk=request.POST.get('user_id'))
+        username = user.username
+        user.delete()
+        messages.success(request, f"Removed incomplete sign-up '{username}' — they can now register again.")
+        return redirect('adminpanel:members_pending')
+
     if request.method == 'POST':
         member = get_object_or_404(Member, pk=request.POST.get('member_id'))
         action = request.POST.get('action')
@@ -85,7 +98,10 @@ def members_pending(request):
         return redirect('adminpanel:members_pending')
 
     members = Member.objects.filter(status=Member.PENDING).select_related('user', 'institution', 'industry')
-    return render(request, 'adminpanel/members_pending.html', {'members': members})
+    return render(request, 'adminpanel/members_pending.html', {
+        'members': members,
+        'incomplete_users': _incomplete_signups().order_by('-date_joined'),
+    })
 
 
 @staff_member_required

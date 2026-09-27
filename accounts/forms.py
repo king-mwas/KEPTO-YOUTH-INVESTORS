@@ -3,6 +3,7 @@ import re
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from django.db import transaction
 
 from .models import Industry, Institution, Member
 
@@ -83,8 +84,13 @@ class SignUpForm(UserCreationForm):
         return cleaned_data
 
     def save(self, commit=True):
-        user = super().save(commit=commit)
-        if commit:
+        if not commit:
+            return super().save(commit=False)
+        # User and Member are saved together: if the Member can't be created,
+        # the User is rolled back too, so we never end up with a login that
+        # has no Member profile (and so never shows up for admin approval).
+        with transaction.atomic():
+            user = super().save(commit=True)
             self._create_member(user)
         return user
 

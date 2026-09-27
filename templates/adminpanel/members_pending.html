@@ -40,4 +40,35 @@
 {% else %}
   <div class="placeholder-block">No members waiting for approval.</div>
 {% endif %}
+
+{% if incomplete_users %}
+  <div class="section-heading" style="text-align:left;margin:2.5rem 0 1rem;">
+    <h2>Incomplete Sign-ups</h2>
+    <p style="color:var(--color-muted);">These people created a login but their member profile was never saved, so they can't be approved.
+      Remove them so they can sign up again with the same username.</p>
+  </div>
+  <div class="admin-table-wrap">
+    <table class="admin-table">
+      <thead>
+        <tr><th>Username</th><th>Email</th><th>Registered</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        {% for u in incomplete_users %}
+          <tr>
+            <td>{{ u.username }}</td>
+            <td>{{ u.email|default:"—" }}</td>
+            <td>{{ u.date_joined|date:"d M Y" }}</td>
+            <td>
+              <form method="post" class="row-actions" onsubmit="return confirm('Remove {{ u.username|escapejs }} so they can sign up again?');">
+                {% csrf_token %}
+                <input type="hidden" name="user_id" value="{{ u.pk }}">
+                <button type="submit" name="action" value="remove_incomplete" class="btn btn--danger-outline">Remove</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endif %}
 {% endblock %}
