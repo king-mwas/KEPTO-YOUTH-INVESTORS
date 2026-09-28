@@ -1,5 +1,6 @@
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.shortcuts import redirect, render
 
 from .forms import SignUpForm
@@ -22,7 +23,10 @@ def signup(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST)
         if form.is_valid():
-            user = form.save()
+            # User + Member are saved together: if the Member can't be created,
+            # no half-registered user is left behind (invisible to the admin panel).
+            with transaction.atomic():
+                user = form.save()
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             return redirect('savings:dashboard')
     else:
