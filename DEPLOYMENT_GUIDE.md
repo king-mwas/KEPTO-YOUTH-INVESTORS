@@ -191,6 +191,10 @@ pip install -r requirements.txt && python manage.py collectstatic --noinput && p
 gunicorn core.wsgi:application
 ```
 
+> Database migrations also run automatically every time gunicorn starts
+> (see `gunicorn.conf.py`), so a skipped `migrate` in the build step can no
+> longer leave the database out of date.
+
 ### Step 4: Add Environment Variables
 
 In Render dashboard, add these environment variables:

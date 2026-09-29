@@ -42,9 +42,9 @@ if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
     CSRF_TRUSTED_ORIGINS = [f'https://{RENDER_EXTERNAL_HOSTNAME}']
 
-# Allow all onrender.com domains
+# Allow all onrender.com domains (Django wildcard syntax is '.domain', not '*.domain')
 if not DEBUG:
-    ALLOWED_HOSTS.extend(['*.onrender.com', 'onrender.com'])
+    ALLOWED_HOSTS.append('.onrender.com')  # leading dot = any subdomain
 
 
 # Application definition

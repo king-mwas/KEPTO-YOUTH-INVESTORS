@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.models import User
 from django.db.models import Q, Sum
 from django.db.models.functions import TruncMonth
 from django.shortcuts import get_object_or_404, redirect, render
@@ -85,7 +86,12 @@ def members_pending(request):
         return redirect('adminpanel:members_pending')
 
     members = Member.objects.filter(status=Member.PENDING).select_related('user', 'institution', 'industry')
-    return render(request, 'adminpanel/members_pending.html', {'members': members})
+    # Users whose signup crashed before their Member profile was saved. They
+    # can't be approved (no phone/Member ID), but the admin should know they exist.
+    incomplete_users = User.objects.filter(member__isnull=True, is_staff=False).order_by('-date_joined')
+    return render(request, 'adminpanel/members_pending.html', {
+        'members': members, 'incomplete_users': incomplete_users,
+    })
 
 
 @staff_member_required
