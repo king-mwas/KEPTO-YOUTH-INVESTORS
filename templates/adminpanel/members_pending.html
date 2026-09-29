@@ -42,6 +42,15 @@
 {% endif %}
 
 {% if incomplete_users %}
+  <div class="section-heading" style="text-align:left;margin:2.5rem 0 1rem;">
+    <h2>Incomplete Sign-ups</h2>
+    <p style="color:var(--color-muted);">These people created a login but their member profile was never saved, so they can't be approved.
+      Remove them so they can sign up again with the same username.</p>
+  </div>
+  <div class="admin-table-wrap">
+    <table class="admin-table">
+      <thead>
+        <tr><th>Username</th><th>Email</th><th>Registered</th><th>Action</th></tr>
   <div class="section-heading" style="text-align:left;margin:2.5rem 0 0.5rem;">
     <h2>Incomplete Signups</h2>
   </div>
@@ -57,6 +66,13 @@
             <td>{{ u.username }}</td>
             <td>{{ u.email|default:"—" }}</td>
             <td>{{ u.date_joined|date:"d M Y" }}</td>
+            <td>
+              <form method="post" class="row-actions" onsubmit="return confirm('Remove {{ u.username|escapejs }} so they can sign up again?');">
+                {% csrf_token %}
+                <input type="hidden" name="user_id" value="{{ u.pk }}">
+                <button type="submit" name="action" value="remove_incomplete" class="btn btn--danger-outline">Remove</button>
+              </form>
+            </td>
             <td><a href="{% url 'admin:auth_user_change' u.pk %}" class="btn btn--outline">Open in Django Admin</a></td>
           </tr>
         {% endfor %}
