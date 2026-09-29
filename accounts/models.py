@@ -86,6 +86,10 @@ class Member(models.Model):
     )
     avatar_preset = models.CharField(max_length=20, blank=True)  # e.g. "av1"; blank if a photo is used
     avatar_image = models.ImageField(upload_to='avatars/', blank=True, null=True)
+    savings_goal = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True,
+                                       help_text='Optional savings target in KES (any amount)')
+    savings_goal_label = models.CharField(max_length=100, blank=True,
+                                          help_text='What are you saving for? e.g. "Laptop", "School Fees"')
 
     created_at = models.DateTimeField(auto_now_add=True)
 

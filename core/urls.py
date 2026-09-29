@@ -25,6 +25,7 @@ urlpatterns = [
     path('dashboard/', include('savings.urls')),
     path('investments/', include('investments.urls')),
     path('panel/', include('adminpanel.urls')),
+    path('api/mpesa/', include('mpesa.urls')),
     path('', include('pages.urls')),
 ]
 

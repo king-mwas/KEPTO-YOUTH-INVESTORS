@@ -21,7 +21,10 @@
       </div>
       <div>
         <label for="{{ form.password.id_for_label }}">Password</label>
-        {{ form.password }}
+        <div class="password-field">
+          {{ form.password }}
+          <button type="button" class="password-toggle" title="Show/hide password">👁️</button>
+        </div>
         {{ form.password.errors }}
       </div>
       {{ form.non_field_errors }}
