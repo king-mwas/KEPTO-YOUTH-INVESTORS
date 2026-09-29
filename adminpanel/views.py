@@ -101,6 +101,11 @@ def members_pending(request):
     return render(request, 'adminpanel/members_pending.html', {
         'members': members,
         'incomplete_users': _incomplete_signups().order_by('-date_joined'),
+    # Users whose signup crashed before their Member profile was saved. They
+    # can't be approved (no phone/Member ID), but the admin should know they exist.
+    incomplete_users = User.objects.filter(member__isnull=True, is_staff=False).order_by('-date_joined')
+    return render(request, 'adminpanel/members_pending.html', {
+        'members': members, 'incomplete_users': incomplete_users,
     })
 
 
