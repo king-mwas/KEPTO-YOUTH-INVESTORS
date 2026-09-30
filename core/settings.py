@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'pages',
     'accounts.apps.AccountsConfig',
     'savings',
+    'investments',
     'announcements',
     'adminpanel',
     'notifications',

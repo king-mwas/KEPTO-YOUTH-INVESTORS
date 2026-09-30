@@ -44,6 +44,9 @@
           {% endif %}
           {% if user.member %}
             <a href="{% url 'savings:dashboard' %}" class="btn btn--outline">Dashboard</a>
+            {% if user.member.investment_unlocked %}
+              <a href="{% url 'investments:home' %}" class="btn btn--outline">Investments</a>
+            {% endif %}
             <a href="{% url 'accounts:profile' %}" class="btn btn--outline">My Profile</a>
           {% endif %}
           <form action="{% url 'accounts:logout' %}" method="post" style="margin:0;">

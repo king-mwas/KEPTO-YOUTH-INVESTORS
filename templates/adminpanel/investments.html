@@ -1,0 +1,66 @@
+{% extends "adminpanel/base_admin.html" %}
+
+{% block title %}Investments – KEPTO Admin{% endblock %}
+
+{% block content %}
+<div class="section-heading"><h2>Pending Investments</h2></div>
+{% if pending %}
+  <div class="admin-table-wrap">
+    <table class="admin-table">
+      <thead><tr><th>Member</th><th>Option</th><th>Amount</th><th>Source</th><th>Reference</th><th>Requested</th><th>Action</th></tr></thead>
+      <tbody>
+        {% for inv in pending %}
+          <tr>
+            <td>{{ inv.member.member_id }}</td>
+            <td>{{ inv.option.name }}</td>
+            <td>KES {{ inv.amount|floatformat:0 }}</td>
+            <td>{% if inv.source == 'savings' %}<span class="badge badge--approved">Savings</span>{% else %}<span class="badge badge--pending">New deposit</span>{% endif %}</td>
+            <td>{{ inv.reference|default:"—" }}</td>
+            <td>{{ inv.created_at|date:"d M Y" }}</td>
+            <td>
+              <form method="post" class="row-actions">
+                {% csrf_token %}
+                <input type="hidden" name="investment_id" value="{{ inv.pk }}">
+                <button type="submit" name="action" value="approve" class="btn btn--primary">Approve</button>
+                <button type="submit" name="action" value="reject" class="btn btn--danger-outline">Reject</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <div class="placeholder-block" style="margin-bottom:2.5rem;">No investments awaiting approval.</div>
+{% endif %}
+
+<div class="section-heading" style="margin-top:2rem;"><h2>Active Investments</h2></div>
+{% if active %}
+  <div class="admin-table-wrap">
+    <table class="admin-table">
+      <thead><tr><th>Member</th><th>Option</th><th>Principal</th><th>Returns</th><th>Value</th><th>Record a return</th></tr></thead>
+      <tbody>
+        {% for inv in active %}
+          <tr>
+            <td>{{ inv.member.member_id }}</td>
+            <td>{{ inv.option.name }}</td>
+            <td>KES {{ inv.amount|floatformat:0 }}</td>
+            <td>KES {{ inv.total_returns|floatformat:0 }}</td>
+            <td>KES {{ inv.current_value|floatformat:0 }}</td>
+            <td>
+              <form method="post" class="row-actions" style="align-items:center;">
+                {% csrf_token %}
+                <input type="hidden" name="investment_id" value="{{ inv.pk }}">
+                <input type="number" name="return_amount" min="1" step="1" placeholder="KES" style="width:110px;padding:0.4rem 0.6rem;border:1px solid var(--a-border);border-radius:8px;">
+                <button type="submit" name="action" value="record_return" class="btn btn--primary">Add</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <div class="placeholder-block">No active investments yet.</div>
+{% endif %}
+{% endblock %}

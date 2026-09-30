@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Investments – KEPTO{% endblock %}
+
+{% block extra_head %}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="dash">
+  <div class="wrap">
+
+    <div class="profilebar">
+      <div class="who">
+        <span class="av">{% if member.avatar_url %}<img src="{{ member.avatar_url }}" alt="">{% else %}{{ member.initials }}{% endif %}</span>
+        <div>
+          <p class="greet">Investments · Level {{ member.level }}</p>
+          <p class="name">Grow beyond savings</p>
+        </div>
+      </div>
+      <a href="{% url 'savings:dashboard' %}" class="btn-edit">← Back to dashboard</a>
+    </div>
+
+    <div class="stats inv-summary">
+      <div class="stat"><p class="k">Savings available</p><p class="v">KES {{ member.savings_available|floatformat:0 }}</p></div>
+      <div class="stat"><p class="k">Total invested</p><p class="v">KES {{ member.total_invested|floatformat:0 }}</p></div>
+      <div class="stat"><p class="k">Returns earned</p><p class="v">KES {{ member.total_investment_returns|floatformat:0 }}</p></div>
+    </div>
+
+    <div class="sec-head"><h2>Where you can invest</h2></div>
+    <div class="opt-grid">
+      {% for option in options %}
+        <div class="opt-card">
+          <div class="opt-top">
+            <h3>{{ option.name }}</h3>
+            {% if option.annual_rate %}<span class="opt-rate">{{ option.annual_rate|floatformat:"-2" }}% p.a.</span>{% endif %}
+          </div>
+          <p class="opt-fund">
+            {% if option.funded_from_savings %}Bought from your savings{% else %}Funded by a new investment deposit{% endif %}
+          </p>
+          {% if option.about %}
+            <details class="opt-about"><summary>About this investment</summary><p>{{ option.about|linebreaksbr }}</p></details>
+          {% endif %}
+
+          <details class="inv-form-wrap">
+            <summary class="btn-invest">Invest</summary>
+            <form method="post" action="{% url 'investments:invest' option.slug %}" class="inv-form">
+              {% csrf_token %}
+              <label>Amount (KES)
+                <input type="number" name="amount" min="1" step="100" required>
+              </label>
+              {% if option.funded_from_savings %}
+                <p class="inv-hint">Uses your savings — KES {{ member.savings_available|floatformat:0 }} available.</p>
+              {% else %}
+                <label>M-Pesa code / reference (optional)
+                  <input type="text" name="reference" maxlength="60" placeholder="e.g. SGH4T29">
+                </label>
+                <p class="inv-hint">A new deposit — an admin confirms it before it goes active.</p>
+              {% endif %}
+              <button type="submit" class="btn-save">Submit for approval</button>
+            </form>
+          </details>
+        </div>
+      {% empty %}
+        <div class="empty">No investment options are open right now — check back soon.</div>
+      {% endfor %}
+    </div>
+
+    <div class="sec-head"><h2>My investments</h2></div>
+    {% if investments %}
+      <div class="d-card">
+        <table class="dep">
+          <thead><tr><th>Option</th><th>Amount</th><th>Source</th><th>Returns</th><th>Value</th><th>Status</th></tr></thead>
+          <tbody>
+            {% for inv in investments %}
+              <tr>
+                <td>{{ inv.option.name }}</td>
+                <td class="amt-cell">KES {{ inv.amount|floatformat:0 }}</td>
+                <td><span class="ref">{% if inv.source == 'savings' %}Savings{% else %}New deposit{% endif %}</span></td>
+                <td class="amt-cell">KES {{ inv.total_returns|floatformat:0 }}</td>
+                <td class="amt-cell">KES {{ inv.current_value|floatformat:0 }}</td>
+                <td>
+                  {% if inv.status == 'active' %}<span class="pill ok">Active</span>
+                  {% elif inv.status == 'rejected' %}<span class="pill rej">Rejected</span>
+                  {% elif inv.status == 'closed' %}<span class="pill">Closed</span>
+                  {% else %}<span class="pill pend">Pending</span>{% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty">You haven't invested yet — pick an option above to get started.</div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}
